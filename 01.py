@@ -19,4 +19,4 @@ one = sum(abs(l - r) for l, r in zip(left, right))
 two = sum(k * v * r_counts[k] for k, v in l_counts.items())
 
 print(f"Part one: {one}")
-print(f"Part one: {two}")
+print(f"Part two: {two}")
