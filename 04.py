@@ -18,4 +18,4 @@ xmas = lambda x, y: grid[y-1][x-1] + grid[y+1][x+1] in ["MS", "SM"] and grid[y-1
 two = sum( xmas(x, y) for y in range(1, Y-1) for x in range(1, X-1) if grid[y][x] == "A")
 
 print(f"Part one: {one}")
-print(f"Part one: {two}")
+print(f"Part two: {two}")
