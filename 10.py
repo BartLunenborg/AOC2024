@@ -24,7 +24,6 @@ def trail_score_two(x, y, slope=0):
         return MEMO[y][x][0]
     if slope == END:
         return 1
-    
     total = sum(trail_score_two(x + dx[i], y + dy[i], slope + 1) for i in range(4))
     MEMO[y][x] = (total, SEEN)
     return total
