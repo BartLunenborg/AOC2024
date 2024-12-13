@@ -15,7 +15,7 @@ def solve(m, add=0):
     a_x, a_y, b_x, b_y = m[0][0], m[0][1], m[1][0], m[1][1]
 
     det = a_x * b_y - b_x * a_y
-    det_x, det_y = x * b_y - y * b_x,  a_x * y - a_y * x
+    det_x, det_y = x * b_y - y * b_x, a_x * y - a_y * x
     a, b = det_x / det, det_y / det
 
     return int(3 * a + b) if a == int(a) and b == int(b) else 0
