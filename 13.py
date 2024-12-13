@@ -12,14 +12,14 @@ def prize(prize):
 def find_min(machines):
     total = 0
     for m in machines:
-        x, y = Ints('x y')
+        A, B = Ints('A B')  # A and B presses
         o = Optimize()
-        o.add(m[0][0] * x + m[1][0] * y == m[2][0])  # x direction
-        o.add(m[0][1] * x + m[1][1] * y == m[2][1])  # y direction
-        cost = 3 * x + y
+        o.add(m[0][0] * A + m[1][0] * B == m[2][0])  # x direction
+        o.add(m[0][1] * A + m[1][1] * B == m[2][1])  # y direction
+        cost = 3 * A + B
         o.minimize(cost)
         if o.check() == sat:
-            total += o.model()[x].as_long() * 3 + o.model()[y].as_long()
+            total += o.model()[A].as_long() * 3 + o.model()[B].as_long()
     return total
 
 file = open("./input/13.in").read().strip().split("\n")
