@@ -16,16 +16,6 @@ def sim_bots(bots):
 def overlap(bots, num_bots):
     return len({(bot[0][0], bot[0][1]) for bot in bots}) != num_bots
 
-def print_bots(bots):
-    bots = {(bot[0][0], bot[0][1]) for bot in bots}
-    for y in range(Y):
-        for x in range(X):
-            if (x, y) in bots:
-                print("*", end="")
-            else:
-                print(" ", end="")
-        print()
-
 file = open("./input/14.in").read().strip()
 bots = [parse_line(line) for line in file.split("\n")]
 
@@ -44,7 +34,7 @@ num_bots = len(bots)
 while overlap(bots, num_bots):
     sim_bots(bots)
     two += 1
-print_bots(bots)
+print("\n".join("".join("*" if (x, y) in {(bot[0][0], bot[0][1]) for bot in bots} else " " for x in range(X)) for y in range(Y)))
 
 print(f"Part one: {one}")
 print(f"Part two: {two}")
