@@ -1,4 +1,4 @@
-MAX = 1 << 31 - 1
+from functools import cache
 
 numdir = {
     "A": (2, 3),
@@ -27,65 +27,72 @@ move2char = {0: ">", 1: "^", 2: "<", 3: "v"}
 
 def find_path(a, b, dir):
     start, end, points = dir[a], dir[b], dir.values()
-    shortest_strings, shortest_length = [], 10
+    shortest_strings, shortest_length = [], 1 << 31 - 1
     Q = [(start, [], "")]
     
     while Q:
         (x, y), path, string = Q.pop(0)
+        l = len(string)
+        if l > shortest_length:
+            continue
+
         if (x, y) == end:
-            if len(string) < shortest_length:
-                shortest_length = len(string)
+            if l < shortest_length:
+                shortest_length = l
                 shortest_strings = [string + "A"]
-            elif len(string) == shortest_length:
+            elif l == shortest_length:
                 shortest_strings.append(string + "A")
             continue
 
-        if len(string) > shortest_length:
-            continue
-        
         for i, (dx, dy) in enumerate(moves):
             nx, ny = x + dx, y + dy
-            
             if (x, y) in points and (nx, ny) not in path:
                 new_path = path + [(nx, ny)]
                 new_string = string + move2char[i]
-                
-                if (nx, ny) == end:
-                    if len(new_string) < shortest_length:
-                        shortest_length = len(new_string)
-                        shortest_strings = [new_string + "A"]
-                    elif len(new_string) == shortest_length:
-                        shortest_strings.append(new_string + "A")
-                else:
-                    Q.append(((nx, ny), new_path, new_string))
+                Q.append(((nx, ny), new_path, new_string))
     
     return shortest_strings
 
+priority = {'<': 1, '^': 2, 'v': 3, '>': 4, 'A': 5}
+@cache
+def string_priority(s):
+    return [priority[char] for char in s]
+
+@cache
+def string_turns(s):
+    return sum(1 for a, b in zip(s, s[1:]) if a != b)
+
+# How to go about picking the best string was given to me as a hint.
+# First we pick the string with the fewest turns: '<vv<' over '<^>v'
+# If there is a tie we prioritize '<' over '^' over '>' over '>'
+@cache
+def best(options):
+    min_turns = min(string_turns(s) for s in options)
+    options = [s for s in options if string_turns(s) == min_turns]
+    return min(options, key=string_priority)
+
+@cache
 def translate(xs):
-    ys, y_min = [], MAX
-    for x in xs:
-        string = [find_path(a, b, movedir) for a, b in zip("A" + x, x)]
-        y_min = min(y_min, len(string))
-        ys.append(string)
-    ys = [y for y in ys if len(y) == y_min]
-    return ys
+    return [find_path(a, b, movedir) for a, b in zip("A" + xs, xs)]
 
-def find_sequence(code):
-    a = [find_path(a, b, numdir) for a, b in zip("A" + code, code)]
-    a = [translate(tuple(xs)) for xs in a]
+@cache
+def __code_len(x, robots):
+    if robots == 0:
+        return len(x)
+    xs = [best(tuple(y)) for y in translate(x)]
+    return sum(__code_len(x, robots - 1) for x in xs)
 
-    complexity = 0
-    for xsss in a:
-        xss_min = MAX
-        for xss in xsss:
-            xss_trans = [translate(tuple(xs)) for xs in xss]
-            xss_min = min(xss_min, sum(min(sum(len(y[0]) for y in ys) for ys in yss) for yss in xss_trans))
-        complexity += xss_min
-
-    return complexity
+def code_len(code, robots):
+    xs = [best(tuple(x)) for x in [find_path(a, b, numdir) for a, b in zip("A" + code, code)]]
+    return sum(__code_len(x, robots) for x in xs)
 
 codes = [line.strip() for line in open("./input/21.in").read().strip().split("\n")]
 
-sequences = [find_sequence(code) for code in codes]
+sequences = [code_len(code, 2) for code in codes]
 one = sum(int(code[:3]) * sequence for code, sequence in zip(codes, sequences))
+
+sequences = [code_len(code, 25) for code in codes]
+two = sum(int(code[:3]) * sequence for code, sequence in zip(codes, sequences))
+
 print(f"Part one: {one}")
+print(f"Part one: {two}")
