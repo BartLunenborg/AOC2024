@@ -95,4 +95,4 @@ sequences = [code_len(code, 25) for code in codes]
 two = sum(int(code[:3]) * sequence for code, sequence in zip(codes, sequences))
 
 print(f"Part one: {one}")
-print(f"Part one: {two}")
+print(f"Part two: {two}")
