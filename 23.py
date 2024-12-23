@@ -1,28 +1,17 @@
 from collections import defaultdict
 
 class Graph():
-    def __init__(self):
-        self.nodes = set()
+    def __init__(self, input):
         self.edges = defaultdict(set)
-
-    def add(self, connection):
-        a, b = connection.split("-")
-        self.nodes.add(a)
-        self.nodes.add(b)
-        self.edges[a].add(b)
-        self.edges[b].add(a)
+        for a, b in (line.split("-") for line in input):
+            self.edges[a].add(b)
+            self.edges[b].add(a)
+        self.nodes = set(self.edges)
 
     def triples(self):
-        triples = set()
-        for a in self.nodes:
-            for b in self.edges[a]:
-                if b > a:
-                    for c in self.edges[b]:
-                        if c > b and a in self.edges[c]:
-                            triples.add((a, b, c))
-        return triples
+        return {(a, b, c) for a in self.nodes for b in self.edges[a] if b > a for c in self.edges[b] if c > b and a in self.edges[c]}
 
-    # https://en.wikipedia.org/wiki/Bron%E2%80%93Kerbosch_algorithm
+    # Finds the largest clique using Bron-Kerbosch: https://en.wikipedia.org/wiki/Bron%E2%80%93Kerbosch_algorithm
     def bron_kerbosch(self, R, P, X):
         if not P and not X:
             return R
@@ -37,16 +26,9 @@ class Graph():
 
         return best
 
-    def largest_clique(self):
-        best = self.bron_kerbosch(set(), self.nodes.copy(), set())
-        return sorted(best)
-
-file, G = open("./input/23.in").read().strip(), Graph()
-for line in file.split("\n"):
-    G.add(line)
-
-one = sum(any(s[0] == "t" for s in t) for t in G.triples())
-two = ",".join(G.largest_clique())
+G = Graph([line for line in open("input/23.in").read().strip().split("\n")])
+one = sum(any(t[0] == "t" for t in triple) for triple in G.triples())
+two = ",".join(sorted(G.bron_kerbosch(set(), G.nodes.copy(), set())))
 
 print(f"Part one: {one}")
 print(f"Part two: {two}")
